@@ -3,55 +3,55 @@ library(R6)
 RV <- R6Class(
   "RV",
   public = list(
-    dist = NULL,
-    mean = NULL,
-    variance = NULL,
-    param_list = list(),
-    n = NULL,
+    dist_name = NULL,
+    params = list(),
     vals = NULL,
+    range = NULL,
+    cont = NULL,
 
-    initialize = function(dist, param_list, n) {
-      self$dist <- dist
-      self$param_list <- param_list
-      self$n <- n
+    initialize = function(dist_name, params) {
+      self$dist_name <- dist_name
+      self$params <- params
 
-      # generate copies
-      self$generate_samples()
-
-      # compute mean
-      if (self$dist == "normal") {
-        self$mean <- self$param_list$mean
-      } else if (self$dist == "uniform") {
-        self$mean <- (self$param_list$min + self$param_list$max) / 2
-      } else {
-        stop("Distribution not supported yet!")
-      }
-
-      # compute variance
-      if (self$dist == "normal") {
-        self$variance <- self$param_list$sd^2
-      } else if (self$dist == "uniform") {
-        self$variance <- ((self$param_list$max - self$param_list$min)^2) / 12
-      } else {
-        stop("Distribution not supported yet!")
+      # compute attributes
+      if (self$dist_name == "normal") {
+        self$range <- c(self$params$mean-3*self$params$sd,
+                        self$params$mean+3*self$params$sd)
+        self$cont <- TRUE
+      } else if (self$dist_name == "uniform") {
+        self$range <- c(self$params$min, self$params$max)
+        self$cont <- TRUE
+      } else if (self$dist_name == "binomial") {
+        self$range <- c(0, 1)
+        self$cont <- FALSE
       }
     },
 
-    generate_samples = function() {
-      if (self$dist == "normal") {
-        self$vals <- rnorm(self$n,
-                           mean = self$param_list$mean,
-                           sd = self$param_list$sd)
-      } else if (self$dist == "uniform") {
-        self$vals <- runif(self$n,
-                           min = self$param_list$min,
-                           max = self$param_list$max)
+    generate_samples = function(n) {
+      if (self$dist_name == "normal") {
+        return(rnorm(n,
+                     mean = self$params$mean,
+                     sd = self$params$sd))
+      } else if (self$dist_name == "uniform") {
+        return(runif(n,
+                     min = self$params$min,
+                     max = self$params$max))
+      } else if (self$dist_name == "binomial") {
+        return(rbinom(n,
+                      size = 1,
+                      prob = self$params$prob))
+      }
+    },
+
+    # randomly draw k knots from the range of the RV
+    get_knots = function(k) {
+      if (self$cont) {
+        # continuous
+        return(runif(k, self$range[1], self$range[2]))
       } else {
-        stop("Distribution not supported yet!")
+        # binary
+        return(rep(1, times = k))
       }
     }
   )
 )
-
-normal_rv <- RV$new("normal", list(mean = 0, sd = 1), 100)
-uniformCovar <- RV$new("uniform", list(min = 0, max = 1), 100)
