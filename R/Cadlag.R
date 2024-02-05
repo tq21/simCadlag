@@ -24,7 +24,7 @@ Cadlag <- R6Class(
 
     # generate parameters for RV objects
     gen_param_list = function(samp_dists) {
-      return(map(samp_dists, function(x) {
+      self$param_list <- map(samp_dists, function(x) {
         if (x == "normal") {
           return(list(mean = runif(1, -10, 10), sd = runif(1, 0, 10)))
         } else if (x == "uniform") {
@@ -33,7 +33,7 @@ Cadlag <- R6Class(
         } else if (x == "binomial") {
           return(list(prob = runif(1, 0.2, 0.8)))
         }
-      }))
+      })
     },
 
     # generate a list of RV objects
@@ -42,7 +42,7 @@ Cadlag <- R6Class(
 
       # draw distributions of RVs and their parameters
       samp_dists <- sample(dist_names, self$n_vars, replace = TRUE)
-      self$param_list <- self$gen_param_list(samp_dists)
+      self$gen_param_list(samp_dists)
 
       # initialize RVs based on the distributions and parameters
       self$rv_list <- map2(samp_dists, self$param_list, function(dist, params) {
@@ -103,7 +103,7 @@ Cadlag <- R6Class(
       X <- map_dfc(1:length(self$rv_list), function(i) {
         rv_obj <- self$rv_list[[i]]
         tmp <- data.frame(tmp = rv_obj$generate_samples(n))
-        names(tmp) <- "X_" %+% i
+        names(tmp) <- "X" %+% i
         return(tmp)
       })
 
