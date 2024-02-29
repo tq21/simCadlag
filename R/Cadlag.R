@@ -1,18 +1,64 @@
-library(R6)
-
+#' Cadlag function class
+#'
+#' @description An `R6` class for randomly generating a Cadlag function.
+#' Currently the class is designed to generate a Cadlag function of the form
+#' finite linear combination of 0-order basis functions, that is, indicator
+#' functions.
+#'
+#' @export
+#'
+#' @importFrom R6 R6Class
+#' @importFrom purrr map map2 map_dbl map_dfc
+#' @importFrom hal9001 make_design_matrix
+#' @importFrom utils combn
+#'
+#' @examples
+#' set.seed(123)
+#' random_function <- Cadlag$new(n_vars = 3)
+#' random_function$gen_formula()
+#' df <- random_function$gen_samples(500)
 Cadlag <- R6Class(
   "Cadlag",
   public = list(
+    #' @field order
+    #' Order of each basis function.
     order = NULL,
+
+    #' @field total_var_norm
+    #' Total variation norm of the function.
     total_var_norm = NULL,
+
+    #' @field formula
+    #' Formula of the function.
     formula = NULL,
+
+    #' @field n_vars
+    #' Number of variables in the function.
     n_vars = NULL,
+
+    #' @field coefs
+    #' Coefficients of the basis functions.
     coefs = NULL,
+
+    #' @field rv_list
+    #' RV (random variable) objects.
     rv_list = NULL,
+
+    #' @field param_list
+    #' Parameters for RV objects.
     param_list = NULL,
+
+    #' @field basis_list
+    #' Basis functions.
     basis_list = NULL,
+
+    #' @field max_degree
+    #' Maximum degree of interaction of the basis functions.
     max_degree = NULL,
 
+    #' @description Initialize a new instance of the Cadlag class.
+    #'
+    #' @param n_vars An integer for the number of variables in the function.
     initialize = function(n_vars) {
       self$n_vars <- n_vars
 
@@ -22,7 +68,9 @@ Cadlag <- R6Class(
       self$total_var_norm <- runif(1, 0, 100)
     },
 
-    # generate parameters for RV objects
+    #' @description Generate parameters for RV objects
+    #'
+    #' @param samp_dists A character vector for the sampled distributions.
     gen_param_list = function(samp_dists) {
       self$param_list <- map(samp_dists, function(x) {
         if (x == "normal") {
@@ -36,7 +84,7 @@ Cadlag <- R6Class(
       })
     },
 
-    # generate a list of RV objects
+    #' @description Generate a list of RV objects
     gen_rv_list = function() {
       dist_names <- c("normal", "uniform", "binomial")
 
@@ -50,13 +98,13 @@ Cadlag <- R6Class(
       })
     },
 
-    # generate intercept and coefficients given the total variation norm
+    #' @description Generate intercept and coefficients given the total variation norm
     gen_coefs = function() {
       coefs <- runif(length(self$basis_list)+1, min = -1, max = 1)
       self$coefs <- coefs / sum(abs(coefs)) * self$total_var_norm
     },
 
-    # generate a formula for Y ~ X
+    #' @description Generate a formula for Y ~ X
     gen_formula = function() {
       # generate RVs
       self$gen_rv_list()
@@ -97,7 +145,9 @@ Cadlag <- R6Class(
       #     }), collapse = "+")
     },
 
-    # sample n copies of the data
+    #' @description Sample n copies of the data
+    #'
+    #' @param n An integer for the number of samples to generate.
     gen_samples = function(n) {
       # generate X
       X <- map_dfc(1:length(self$rv_list), function(i) {

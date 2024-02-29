@@ -1,5 +1,5 @@
-.libPaths(c("/global/home/users/skyqiu/R/x86_64-pc-linux-gnu-library/4.2",
-            .libPaths()))
+# .libPaths(c("/global/home/users/skyqiu/R/x86_64-pc-linux-gnu-library/4.2",
+#             .libPaths()))
 
 library(spatialHAL)
 library(hal9001)

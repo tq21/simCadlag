@@ -1,14 +1,44 @@
-library(R6)
-
+#' RV (random variable) class
+#'
+#' @description An `R6` class for randomly generating a random variable.
+#' Currently only normal, uniform, and binomial distributions are supported.
+#'
+#' @export
+#'
+#' @importFrom R6 R6Class
+#' @importFrom stats rnorm runif rbinom
+#'
+#' @examples
+#' set.seed(123)
+#' normal_rv <- RV$new(dist_name = "normal", params = list(mean = 0, sd = 1))
+#' normal_rv$generate_samples(5)
 RV <- R6Class(
   "RV",
   public = list(
+    #' @field dist_name
+    #' Name of the distribution.
     dist_name = NULL,
+
+    #' @field params
+    #' Parameters for the distribution.
     params = list(),
+
+    #' @field vals
+    #' Realizations of the RV.
     vals = NULL,
+
+    #' @field range
+    #' Range of the RV.
     range = NULL,
+
+    #' @field cont
+    #' Whether the RV is continuous.
     cont = NULL,
 
+    #' @description Initialize a new instance of the RV class.
+    #'
+    #' @param dist_name A string for the name of the distribution.
+    #' @param params A list of parameters for the distribution.
     initialize = function(dist_name, params) {
       self$dist_name <- dist_name
       self$params <- params
@@ -27,6 +57,9 @@ RV <- R6Class(
       }
     },
 
+    #' @description Generate samples from the RV.
+    #'
+    #' @param n An integer for the number of samples to generate.
     generate_samples = function(n) {
       if (self$dist_name == "normal") {
         return(rnorm(n,
@@ -43,7 +76,9 @@ RV <- R6Class(
       }
     },
 
-    # randomly draw k knots from the range of the RV
+    #' @description Randomly draw k knots from the range of the RV
+    #'
+    #' @param k An integer for the number of knots to draw.
     get_knots = function(k) {
       if (self$cont) {
         # continuous

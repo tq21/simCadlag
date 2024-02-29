@@ -3,9 +3,9 @@ library(xgboost)
 devtools::load_all()
 
 set.seed(123)
-fun_1 <- Cadlag$new(n_vars = 5)
+fun_1 <- Cadlag$new(n_vars = 3)
 fun_1$gen_formula()
-df <- fun_1$gen_samples(1000)
+df <- fun_1$gen_samples(500)
 df_test <- fun_1$gen_samples(10000)
 
 # fit HAL
