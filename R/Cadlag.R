@@ -9,7 +9,6 @@
 #'
 #' @importFrom R6 R6Class
 #' @importFrom purrr map map2 map_dbl map_dfc
-#' @importFrom hal9001 make_design_matrix
 #' @importFrom utils combn
 #'
 #' @examples
@@ -59,12 +58,12 @@ Cadlag <- R6Class(
     #' @description Initialize a new instance of the Cadlag class.
     #'
     #' @param n_vars An integer for the number of variables in the function.
-    initialize = function(n_vars) {
+    initialize = function(n_vars, max_degree) {
       self$n_vars <- n_vars
 
       # randomly generate configurations
       self$order <- 0
-      self$max_degree <- min(n_vars, 3)
+      self$max_degree <- max_degree
       self$total_var_norm <- runif(1, 0, 100)
     },
 
@@ -158,7 +157,7 @@ Cadlag <- R6Class(
       })
 
       # generate Y
-      expanded_mat <- hal9001::make_design_matrix(as.matrix(X), self$basis_list)
+      expanded_mat <- hal9001:::make_design_matrix(as.matrix(X), self$basis_list)
       Y <- as.vector(self$coefs[1] + expanded_mat %*% self$coefs[-1] + rnorm(n, 0, 1))
 
       return(list(X = X, Y = Y))
